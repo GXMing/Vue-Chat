@@ -8,10 +8,15 @@ const OptimizeCSSAssetsPlugin = require("optimize-css-assets-webpack-plugin");
 
 
 
-
 module.exports = (env,argv) => {
     console.log(argv.mode+"!!!!!!");
     const dev = argv.mode === "development"?true:false;
+    const publicPath = dev?
+                       "/":
+                       "./dist/";
+
+
+//devServer  运行时publicPath不能为 ./ 会变成 /./ 找不到文件
 
     const config = {
         entry : {
@@ -19,12 +24,13 @@ module.exports = (env,argv) => {
         },
         output : {
             filename : "js/[name].js",
-            publicPath: '/',
+            //publicPath 影响文件内url路径地址   不影响文件产生输出地址   即publicPath 不会影响 path
+            publicPath: publicPath,
             path : path.resolve(__dirname,'dist')
         },
         devtool:'source-map',
         devServer : {
-            contentBase : "./dist",
+            // contentBase : "./dist",  // 即index所在目录   服务器从哪里开始提供内容
             compress : true,   //服务gzip压缩
             historyApiFallback: true,
             //noInfo : true,  //webpack 打包信息隐藏
@@ -42,19 +48,26 @@ module.exports = (env,argv) => {
                 {
                     test : /\.css$/,
                     use : [
-                        dev
-                        ?'style-loader'
-                        :MiniCssExtractPlugin.loader,
-                        'css-loader'
+                        // dev
+                        // ?'style-loader'
+                        // :MiniCssExtractPlugin.loader,
+                        // 'css-loader'
+                        // 'postcss-loader'
+                        'style-loader',
+                        {loader:'css-loader',options:{minimize:true,sourceMap: true}},
+                        'postcss-loader'
                     ]
                 },
                 {
                     test : /\.less$/,
                     use : [
-                        dev
-                        ?'style-loader'
-                        :MiniCssExtractPlugin.loader,
-                        'css-loader','less-loader','postcss-loader'
+                        // dev
+                        // ?'style-loader'
+                        // :MiniCssExtractPlugin.loader,
+                        // 'css-loader','less-loader','postcss-loader'
+                        'style-loader',
+                        {loader:'css-loader',options:{minimize:true,sourceMap: true}},
+                        {loader:'less-loader',options:{sourceMap:true }},'postcss-loader'
                     ]
                 },
                 {
@@ -66,7 +79,8 @@ module.exports = (env,argv) => {
                 },
                 {
                     test: /\.vue$/,
-                    loader:"vue-loader"
+                    loader:"vue-loader",
+                    options:{ sourceMap:true }
                 },
                 {
                     test : /\.js$/,
@@ -120,25 +134,28 @@ module.exports = (env,argv) => {
         },
         plugins : [
             // new webpack.HotModuleReplacementPlugin(),  //热加载 命令行启动--hot可以自动添加
-            new cleanWebpackPlugin(['dist']),
+            new cleanWebpackPlugin(['dist','./index.html']),
             new VueLoaderPlugin(),
-        　　new MiniCssExtractPlugin({
-            　　filename: "css/[name]-[contenthash:8].css",
-                publicpath:"../"
-            }),
+        // 　　new MiniCssExtractPlugin({
+        //     　　filename: "css/[name]-[contenthash:8].css",
+        //         publicpath:"../"
+        //     }),
             new htmlWebpackPlugin({
                 title : "Vue-chat",
                 template : "./src/index.html",
-                filename:"index.html"
+                // 这里将  生产时的index生成在顶级目录，devServer时生成在dist目录!!!
+                // 因为htmlWebpackPlugin 会生成在path目录下(index.html) 顶级目录为path上级(../index.html)
+                // devServe虚拟生成path的目录并开始引用而index就存在path 如果在../index devServe就获取不到
+                // 不推荐！！！
+                filename: dev?"index.html":path.resolve(__dirname,"index.html")
             }),
         ]
     }
     
     if(!dev){
         config.output.filename = "js/[name]-[chunkhash:8].js"
-        // config.output.filename = "js/[name].js"
         config.devtool = "none"
-        config.plugins.push(new OptimizeCSSAssetsPlugin({})) //css压缩
+        // config.plugins.push(new OptimizeCSSAssetsPlugin({})) //提取css压缩
     }
     return config;
 }

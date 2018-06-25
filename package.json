@@ -2,6 +2,7 @@
   "name": "vue-chat",
   "version": "1.0.0",
   "description": "webpack4 + Vue",
+  "browserslist":["> 1%", "last 4 versions", "ie >= 9"],
   "scripts": {
     "webpack": "webpack --mode development --config webpack.config.js --progress --watch",
     "dev": "webpack-dev-server --mode development --config webpack.config.js --hot",
