@@ -13,7 +13,7 @@ module.exports = (env,argv) => {
     const dev = argv.mode === "development"?true:false;
     const publicPath = dev?
                        "/":
-                       "./dist/";
+                       "dist/";
 
 
 //devServer  运行时publicPath不能为 ./ 会变成 /./ 找不到文件
@@ -54,7 +54,7 @@ module.exports = (env,argv) => {
                         // 'css-loader'
                         // 'postcss-loader'
                         'style-loader',
-                        {loader:'css-loader',options:{minimize:true,sourceMap: true}},
+                        {loader:'css-loader',options:{minimize:true,sourceMap: dev}},
                         'postcss-loader'
                     ]
                 },
@@ -66,8 +66,8 @@ module.exports = (env,argv) => {
                         // :MiniCssExtractPlugin.loader,
                         // 'css-loader','less-loader','postcss-loader'
                         'style-loader',
-                        {loader:'css-loader',options:{minimize:true,sourceMap: true}},
-                        {loader:'less-loader',options:{sourceMap:true }},'postcss-loader'
+                        {loader:'css-loader',options:{minimize:true,sourceMap:dev}},
+                        {loader:'less-loader',options:{sourceMap:dev }},'postcss-loader'
                     ]
                 },
                 {
@@ -134,7 +134,6 @@ module.exports = (env,argv) => {
         },
         plugins : [
             // new webpack.HotModuleReplacementPlugin(),  //热加载 命令行启动--hot可以自动添加
-            new cleanWebpackPlugin(['dist','./index.html']),
             new VueLoaderPlugin(),
         // 　　new MiniCssExtractPlugin({
         //     　　filename: "css/[name]-[contenthash:8].css",
@@ -156,6 +155,7 @@ module.exports = (env,argv) => {
         config.output.filename = "js/[name]-[chunkhash:8].js"
         config.devtool = "none"
         // config.plugins.push(new OptimizeCSSAssetsPlugin({})) //提取css压缩
+        config.plugins.push(new cleanWebpackPlugin(['dist','./index.html']))
     }
     return config;
 }

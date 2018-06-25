@@ -1,8 +1,8 @@
-# Chat by Vue + Webpack
+# Chat by Vue+ Vuex + Webpack4  http://starmooms.github.io/vue-chat/
 
-[Live demo](http://)
+[Live demo](http://starmooms.github.io/vue-chat/)
 
-<img width="600" src="./test.gif">
+<img width="100%" src="./test.gif">
 
 ## Build Setup
 
